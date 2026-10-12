@@ -1,9 +1,24 @@
 package com.gamecoach.util
 
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.After
 import org.junit.Test
+import java.util.Locale
 
 class UtilsTest {
+    private lateinit var originalLocale: Locale
+
+    @Before
+    fun useFrenchLocale() {
+        originalLocale = Locale.getDefault()
+        Locale.setDefault(Locale.FRANCE)
+    }
+
+    @After
+    fun restoreLocale() {
+        Locale.setDefault(originalLocale)
+    }
 
     // ─────────────────────────────────────────────
     // formatDate
