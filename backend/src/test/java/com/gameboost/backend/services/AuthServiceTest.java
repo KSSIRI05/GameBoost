@@ -59,6 +59,22 @@ class AuthServiceTest {
     class RegisterTests {
 
         @Test
+        void register_adminRoleIsRejectedBeforePersistence() {
+            RegisterRequest request = new RegisterRequest();
+            request.setRole(User.Role.ADMIN);
+            assertThatThrownBy(() -> authService.register(request))
+                    .isInstanceOf(IllegalArgumentException.class);
+            verifyNoInteractions(userRepository, passwordEncoder, jwtUtils);
+        }
+
+        @Test
+        void register_missingRoleIsRejectedBeforePersistence() {
+            assertThatThrownBy(() -> authService.register(new RegisterRequest()))
+                    .isInstanceOf(IllegalArgumentException.class);
+            verifyNoInteractions(userRepository, passwordEncoder, jwtUtils);
+        }
+
+        @Test
         @DisplayName("Inscription réussie — retourne AuthResponse avec token")
         void register_success() {
             RegisterRequest request = new RegisterRequest();

@@ -32,3 +32,10 @@ build/
 ### VS Code ###
 .vscode/
 .gradle/
+local.properties
+.env
+.env.*
+!.env.example
+*.log
+*.jks
+*.keystore

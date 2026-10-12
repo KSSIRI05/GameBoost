@@ -1,41 +1,73 @@
-# GameBoost Backend - Documentation des Tests Unitaires
+# GameBoost — API REST
 
-Ce document résume l'état des tests unitaires du backend GameBoost, garantissant la qualité et la fiabilité du code.
+API Spring Boot 3.4.4 / Java 21 pour une plateforme de coaching gaming. Les contrôleurs exposent les parcours joueurs, coachs et administrateurs ; la persistance utilise MySQL et Spring Data JPA.
 
-## Résumé de la Couverture
+## Lancement
 
-Le backend bénéficie d'une excellente couverture de tests (supérieure à **90% globalement**). Tous les composants principaux sont testés et validés par l'arsenal de tests automatisés.
-
-- **Nombre total de tests :** `108` tests unitaires.
-- **Taux de réussite :** `100%` (0 erreur, 0 échec).
-
-### Composants Couverts
-
-**Couverture Complète (ou quasi-complète à 100%)**
-- **Contrôleurs :** `AdminController`, `AuthController`, `SessionController` (Test des requêtes HTTP et de leurs réponses).
-- **Services Principaux :** `AdminService`, `AuthService`.
-- **Mécanismes de Sécurité :** `JwtAuthFilter`, `JwtUtils`, `UserDetailsServiceImpl` (Authentification et filtres par rôle).
-- **Gestion Globale :** `GlobalExceptionHandler` (Test de la capture et des messages d'erreurs normés).
-
-**Composants avec quelques instructions manquantes (Très bien couverts mais < 100%)**
-- **`CoachService` / `SessionService` :** Très fortement couverts (85% à 90%), avec seulement quelques "branches" ou conditions extrêmes d'erreur spécifiques qui restent non testées.
-- **`CoachController` / `MessageService` :** Quasi complètement couverts, il manque moins de 10 instructions spécifiques liées aux exceptions de traitement.
-
-## Comment Lancer les Tests
-
-Pour exécuter tous les tests unitaires et s'assurer que le backend est fonctionnel, utilisez **Maven** dans le dossier racine du projet.
+Depuis ce dossier, avec Java 21 et Maven 3.9+ :
 
 ```bash
-# Lancer les tests
-mvn test
-
-# Lancer les tests en générant le rapport de couverture JaCoCo
-mvn test jacoco:report
+mvn verify
 ```
 
-*Le rapport détaillé de couverture de code (généré par JaCoCo) sera consultable dans `target/site/jacoco/index.html` après l'exécution de la dernière commande.*
+Les tests utilisent H2 et leur propre clé JWT de test. Pour lancer l'application avec MySQL, définir `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` et `JWT_SECRET` dans l'environnement du processus, puis :
 
-## Outils Utilisés
-- **JUnit 5 (Jupiter) :** Pour l'exécution et la structure des tests unitaires.
-- **Mockito :** Pour simuler (mocker) le comportement des dépendances (Repositories, bases de données) et tester chaque service de façon isolée.
-- **JaCoCo :** Pour l'analyse et la vérification de la couverture de test.
+```bash
+mvn spring-boot:run
+```
+
+La clé JWT doit être aléatoire et longue d'au moins 32 octets. `JWT_EXPIRATION_MS` vaut 86 400 000 par défaut. Le port est 8080 ; `SERVER_PORT` permet de le changer. Les fichiers `.env` ne sont pas chargés automatiquement.
+
+## Routes implémentées
+
+| Méthode | Route | Fonction |
+|---|---|---|
+| POST | `/auth/register` | Inscription JOUEUR ou COACH |
+| POST | `/auth/login` | Authentification JWT |
+| GET / PUT | `/users/me` | Consulter / modifier son profil |
+| GET | `/coaches` | Coachs approuvés, filtres `game` et `rank` |
+| GET | `/coaches/{id}` | Détail d'un coach |
+| POST | `/coaches/profile` | Candidature coach |
+| PUT | `/coaches/me/profile` | Modifier son profil coach |
+| GET | `/coaches/me/earnings` | Total des séances marquées payées |
+| POST | `/sessions/request` | Demander une séance |
+| GET | `/sessions` | Séances de l'utilisateur |
+| PATCH | `/sessions/{id}/accept` | Accepter une demande |
+| PATCH | `/sessions/{id}/complete` | Déclarer la fin |
+| PATCH | `/sessions/{id}/confirm` | Confirmer la prestation |
+| POST | `/sessions/{id}/pay` | Simuler le paiement |
+| POST | `/sessions/{id}/review` | Noter une séance payée |
+| GET / POST | `/sessions/{id}/messages` | Lire / envoyer des messages |
+| GET | `/admin/coaches/pending` | Coachs en attente |
+| PATCH | `/admin/coaches/{id}/approve` | Approuver un coach |
+| PATCH | `/admin/coaches/{id}/reject` | Rejeter un coach |
+| GET | `/admin/dashboard` | Statistiques |
+| GET | `/admin/users` | Liste des utilisateurs |
+
+Toutes les routes sauf `/auth/**` exigent `Authorization: Bearer <token>`. Les routes administrateur nécessitent le rôle `ADMIN`. Le rôle administrateur ne peut pas être demandé lors de l'inscription publique.
+
+### Exemple d'inscription (bash)
+
+```bash
+curl -X POST http://localhost:8080/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"player@example.test","username":"player_demo","password":"DemoPassword123","role":"JOUEUR"}'
+```
+
+Cet exemple utilise un mot de passe de démonstration. La réponse est une enveloppe `ApiResponse` et le jeton se trouve dans `data.token`. Les champs des DTO Java constituent le contrat actuel ; les exemples du document historique ne sont pas tous à jour.
+
+## Vérification et couverture
+
+Le bilan reproductible est dans [docs/VERIFICATION.md](../docs/VERIFICATION.md). Le rapport JaCoCo local se trouve dans `target/site/jacoco/index.html`.
+
+Le plugin exclut les entités, les DTO et la classe de démarrage. Les taux affichés concernent ce périmètre, pas toutes les lignes du dépôt. Les tests incluent des tests unitaires, des tests de contrôleurs MockMvc et un chargement du contexte Spring sur H2.
+
+## Points corrigés dans ce fork
+
+- Refus du rôle ADMIN à l'inscription, avec tests de régression.
+- Exclusion des mots de passe hachés dans les réponses JSON, y compris imbriquées.
+- Clé JWT et connexion MySQL configurées via l'environnement.
+
+## Limites
+
+Paiement simulé, messages REST sans WebSocket, absence de pagination et de révocation des JWT. Le frontend mobile utilise un dépôt de données en mémoire et n'appelle pas cette API. Le démarrage sur une instance MySQL réelle et les tests de charge restent à vérifier.

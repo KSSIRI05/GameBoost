@@ -22,6 +22,8 @@ public class AuthService {
     private final JwtUtils jwtUtils;
 
     public AuthResponse register(RegisterRequest request) {
+        if (request.getRole() != User.Role.JOUEUR && request.getRole() != User.Role.COACH)
+            throw new IllegalArgumentException("L'inscription publique est réservée aux joueurs et aux coachs");
         if (userRepository.existsByEmail(request.getEmail()))
             throw new IllegalStateException("Email déjà utilisé");
         if (userRepository.existsByUsername(request.getUsername()))

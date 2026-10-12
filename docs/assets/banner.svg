@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340">
+<rect width="1280" height="340" rx="24" fill="#0b1220"/>
+<path d="M860 0h420v340H660z" fill="#102a33"/>
+<circle cx="1080" cy="160" r="114" fill="none" stroke="#38d9b5" stroke-width="2" opacity=".3"/>
+<circle cx="1080" cy="160" r="84" fill="none" stroke="#38d9b5" stroke-width="2" opacity=".5"/>
+<text x="64" y="70" fill="#38d9b5" font-family="Arial,sans-serif" font-size="17" letter-spacing="4">COACHING GAMING</text>
+<text x="60" y="155" fill="#f5f8fb" font-family="Arial,sans-serif" font-size="74" font-weight="700">GameBoost</text>
+<text x="64" y="204" fill="#b1c6d3" font-family="Arial,sans-serif" font-size="24">Des joueurs. Des coachs. Un parcours structuré.</text>
+<text x="64" y="284" fill="#38d9b5" font-family="Arial,sans-serif" font-size="20">JAVA 21  /  SPRING BOOT  /  ANDROID  /  KOTLIN</text>
+<path d="M1030 160h100m-50-50v100" stroke="#38d9b5" stroke-width="12" stroke-linecap="round"/>
+</svg>
